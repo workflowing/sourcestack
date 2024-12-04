@@ -13,7 +13,7 @@ setup(
     author_email="kevin@ksylvest.com",
     license="MIT",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=["requests"],
     keywords="sourcestack",
     classifiers=[
         "Development Status :: 3 - Alpha",
