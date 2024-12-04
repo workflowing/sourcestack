@@ -1,5 +1,5 @@
 import os
-from typing import Literal
+
 from requests import Session
 
 DEFAULT_BASE_URL = "https://sourcestack-api.com"

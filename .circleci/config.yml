@@ -9,16 +9,52 @@ executors:
       - image: cimg/python:3.13
 
 jobs:
-  test:
+  isort:
+    executor: default
+    steps:
+      - checkout
+      - run: pip install isort
+      - run: isort **/*.py -c
+
+  mypy:
+    executor: default
+    steps:
+      - checkout
+      - python/dist
+      - run: pip install dist/sourcestack-*.whl
+      - run: pip install mypy
+      - run: mypy sourcestack --junit-xml=tmp/results.xml
+      - store_test_results:
+          path: tmp/results.xml
+
+  pytest:
     executor: default
     steps:
       - checkout
       - python/dist
       - run: pip install dist/sourcestack-*.whl
       - run: pip install pytest
-      - run: pytest
+      - run: pytest --junit-xml=tmp/results.xml
+      - store_test_results:
+          path: tmp/results.xml
+
+  release:
+    executor: default
+    steps:
+      - checkout
+      - python/dist
+      - run: pip install twine
+      - run: twine upload dist/*
 
 workflows:
   build:
     jobs:
-      - test
+      - isort
+      - mypy
+      - pytest
+      - release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
