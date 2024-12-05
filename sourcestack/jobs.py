@@ -1,25 +1,21 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TypedDict
 from urllib.parse import urljoin
-
-from requests import Session
 
 from sourcestack.resource import Resource
 
-type Job = Dict[str, Any]
+Job = Dict[str, Any]
+
+Response = TypedDict(
+    "Response",
+    {
+        "data": List[Job],
+    },
+)
 
 
 # https://sourcestack.co/docs/example-queries/#jobs
 class Jobs(Resource):
-    def all(self) -> List[Job]:
-        """
-        Fetches all jobs from the SourceStack API.
-
-        Returns:
-            List[Dict[str, Any]]: A list of jobs.
-        """
-        return self._get()
-
-    def by_name(self, name: str, exact: bool = False) -> List[Job]:
+    def by_name(self, name: str, exact: bool = False) -> Response:
         """
         Fetches jobs by name from the SourceStack API.
 
@@ -28,11 +24,11 @@ class Jobs(Resource):
             exact (bool): Whether to match the name exactly.
 
         Returns:
-            List[Dict[str, Any]]: A list of jobs.
+            Response: A list of jobs.
         """
         return self._get(name=name, exact="true" if exact else "false")
 
-    def by_parent(self, parent: str) -> List[Job]:
+    def by_parent(self, parent: str) -> Response:
         """
         Fetches jobs by parent from the SourceStack API.
 
@@ -40,11 +36,11 @@ class Jobs(Resource):
             parent (str): The parent of the job.
 
         Returns:
-            List[Dict[str, Any]]: A list of jobs.
+            Response: A list of jobs.
         """
         return self._get(parent=parent)
 
-    def by_url(self, url: str) -> List[Job]:
+    def by_url(self, url: str) -> Response:
         """
         Fetches jobs by url from the SourceStack API.
 
@@ -52,11 +48,11 @@ class Jobs(Resource):
             url (str): The url of the job.
 
         Returns:
-            List[Dict[str, Any]]: A list of jobs.
+            Response: A list of jobs.
         """
         return self._get(url=url)
 
-    def by_uses_product(self, uses_product: str, exact: bool = True) -> List[Job]:
+    def by_uses_product(self, uses_product: str, exact: bool = True) -> Response:
         """
         Fetches jobs by product from the SourceStack API.
 
@@ -65,11 +61,11 @@ class Jobs(Resource):
             exact (bool): Whether to match the product exactly.
 
         Returns:
-            List[Dict[str, Any]]: A list of jobs.
+            Response: A list of jobs.
         """
         return self._get(uses_product=uses_product, exact="true" if exact else "false")
 
-    def by_uses_category(self, uses_category: str, exact: bool = True) -> List[Job]:
+    def by_uses_category(self, uses_category: str, exact: bool = True) -> Response:
         """
         Fetches jobs by category from the SourceStack API.
 
@@ -78,13 +74,13 @@ class Jobs(Resource):
             exact (bool): Whether to match the category exactly.
 
         Returns:
-            List[Dict[str, Any]]: A list of jobs.
+            Response: A list of jobs.
         """
         return self._get(
             uses_category=uses_category, exact="true" if exact else "false"
         )
 
-    def _get(self, **kwargs) -> List[Job]:
+    def _get(self, **kwargs) -> Response:
         url = urljoin(self.base_url, "jobs")
         response = self.session.get(url, params=kwargs)
         response.raise_for_status()
