@@ -23,21 +23,19 @@ client.jobs.by_uses_product(uses_product="...")
 client.jobs.by_uses_category(uses_category="...")
 ```
 
-## Building
+## Contributing
 
 ```bash
-pip install setuptools
+pip install -r requirements.txt
 ```
+
+### Building
 
 ```bash
 bin/build
 ```
 
-## Publishing
-
-```bash
-pip install twine
-```
+### Publishing
 
 ```bash
 bin/publish
