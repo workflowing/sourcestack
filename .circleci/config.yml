@@ -13,13 +13,16 @@ jobs:
     executor: default
     steps:
       - checkout
-      - run: pip install isort
+      - python/install-packages:
+          pkg-manager: pip
       - run: isort **/*.py -c
 
   mypy:
     executor: default
     steps:
       - checkout
+      - python/install-packages:
+          pkg-manager: pip
       - python/dist
       - run: pip install dist/sourcestack-*.whl
       - run: pip install mypy types-requests
@@ -31,9 +34,10 @@ jobs:
     executor: default
     steps:
       - checkout
+      - python/install-packages:
+          pkg-manager: pip
       - python/dist
       - run: pip install dist/sourcestack-*.whl
-      - run: pip install -r tests/requirements.txt
       - run: pytest --junit-xml=tmp/results.xml
       - store_test_results:
           path: tmp/results.xml
@@ -42,8 +46,9 @@ jobs:
     executor: default
     steps:
       - checkout
+      - python/install-packages:
+          pkg-manager: pip
       - python/dist
-      - run: pip install twine
       - run: twine upload dist/*
 
 workflows:
