@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 DESCRIPTION = "A python package for using the https://sourcestack.co/ API."
 
 with open("README.md", "r", encoding="utf-8") as file:
@@ -15,6 +15,7 @@ setup(
     long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
     author="Kevin Sylvestre",
     author_email="kevin@ksylvest.com",
+    url="https://github.com/workflowing/sourcestack",
     license="MIT",
     packages=find_packages(),
     install_requires=["requests"],
