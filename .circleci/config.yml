@@ -22,7 +22,7 @@ jobs:
       - checkout
       - python/dist
       - run: pip install dist/sourcestack-*.whl
-      - run: pip install mypy
+      - run: pip install mypy types-requests
       - run: mypy sourcestack --junit-xml=tmp/results.xml
       - store_test_results:
           path: tmp/results.xml
