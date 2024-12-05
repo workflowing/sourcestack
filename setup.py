@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 DESCRIPTION = "A python package for using the https://sourcestack.co/ API."
 
 with open("README.md", "r", encoding="utf-8") as file:

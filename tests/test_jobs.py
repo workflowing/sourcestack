@@ -11,22 +11,13 @@ def jobs() -> Jobs:
     return Jobs(base_url="https://api.sourcestack.co", session=session)
 
 
-MOCK_JSON = [
-    {"id": 1, "name": "Job #1"},
-    {"id": 2, "name": "Job #2"},
-]
-
-
-@responses.activate
-def test_jobs_all(jobs: Jobs):
-    responses.add(
-        responses.GET,
-        "https://api.sourcestack.co/jobs",
-        json=MOCK_JSON,
-        status=200,
-    )
-
-    assert jobs.all() == MOCK_JSON
+MOCK_JSON = {
+    "entry_count": 2,
+    "data": [
+        {"id": 1, "name": "Job #1"},
+        {"id": 2, "name": "Job #2"},
+    ],
+}
 
 
 @responses.activate
