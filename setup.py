@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 DESCRIPTION = "An API for SourceStack"
 LONG_DESCRIPTION = "A package that makes it easy to use the https://sourcestack.co/"
 
