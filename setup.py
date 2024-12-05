@@ -1,8 +1,10 @@
 from setuptools import find_packages, setup
 
-VERSION = "0.0.2"
-DESCRIPTION = "An API for SourceStack"
-LONG_DESCRIPTION = "A package that makes it easy to use the https://sourcestack.co/"
+VERSION = "0.0.3"
+DESCRIPTION = "A python package for using the https://sourcestack.co/ API."
+
+with open("README.md", "r", encoding="utf-8") as file:
+    LONG_DESCRIPTION = file.read()
 
 setup(
     name="sourcestack",
