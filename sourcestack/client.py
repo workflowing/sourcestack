@@ -14,6 +14,13 @@ class Client:
         api_key: str | None = os.getenv("SOURCESTACK_API_KEY"),
         base_url: str | None = os.getenv("SOURCESTACK_BASE_URL"),
     ):
+        """
+        Initializes the client with the api key and base url.
+
+        Args:
+            api_key (str): The api key to authenticate with the SourceStack API (required).
+            base_url (str): The base url of the SourceStack API (optional).
+        """
         if not api_key:
             raise ValueError("api_key is required")
         self.api_key = api_key
@@ -21,6 +28,12 @@ class Client:
 
     @property
     def session(self) -> Session:
+        """
+        Builds a session with the api key.
+
+        Returns:
+            request.Session: A session configured with the api key.
+        """
         session = Session()
         session.headers.update({"X-API-KEY": self.api_key})
         return session
