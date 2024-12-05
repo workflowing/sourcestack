@@ -2,6 +2,8 @@ import os
 
 from requests import Session
 
+from sourcestack.jobs import Jobs
+
 DEFAULT_BASE_URL = "https://sourcestack-api.com"
 
 
@@ -35,5 +37,21 @@ class Client:
             request.Session: A session configured with the api key.
         """
         session = Session()
-        session.headers.update({"X-API-KEY": self.api_key})
+        session.headers.update(
+            {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "X-API-KEY": self.api_key,
+            }
+        )
         return session
+
+    @property
+    def jobs(self) -> Jobs:
+        """
+        Returns a jobs resource.
+
+        Returns:
+            Jobs: A jobs resource used to retrieve jobs from the SourceStack API.
+        """
+        return Jobs(session=self.session, base_url=self.base_url)

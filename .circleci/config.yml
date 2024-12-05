@@ -33,7 +33,7 @@ jobs:
       - checkout
       - python/dist
       - run: pip install dist/sourcestack-*.whl
-      - run: pip install pytest
+      - run: pip install -r tests/requirements.txt
       - run: pytest --junit-xml=tmp/results.xml
       - store_test_results:
           path: tmp/results.xml

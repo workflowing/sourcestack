@@ -16,7 +16,12 @@ pip install sourcestack
 from sourcestack.client import Client
 
 client = Client(api_key="fake-api-key")
-client.session
+client.jobs.all()
+client.jobs.by_name(name="...")
+client.jobs.by_parent(parent="...")
+client.jobs.by_url(url="https://...")
+client.jobs.by_uses_product(uses_product="...")
+client.jobs.by_uses_category(uses_category="...")
 ```
 
 ## Building
