@@ -1,6 +1,0 @@
-isort
-mypy
-pytest
-requests
-responses
-twine
