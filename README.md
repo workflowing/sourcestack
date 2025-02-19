@@ -12,21 +12,77 @@ pip install sourcestack
 
 ## Usage
 
-```python
-from sourcestack.client import Client
+### Basic Usage
 
-client = Client(api_key="fake-api-key")
-client.jobs.by_name(name="...")
-client.jobs.by_parent(parent="...")
-client.jobs.by_url(url="https://...")
-client.jobs.by_uses_product(uses_product="...")
-client.jobs.by_uses_category(uses_category="...")
+```python
+from sourcestack.search import SourceStackSearchService
+
+# Initialize the service
+service = SourceStackSearchService(api_key="your-api-key")
+
+# Search for jobs
+results = service.search_jobs(name="DevOps")
 ```
+
+### Search Options
+
+You can search jobs using different parameters:
+
+```python
+# Search by job name (supports exact matching)
+results = service.search_jobs(name="Platform Engineer", exact=True)
+
+# Search by parent company
+results = service.search_jobs(parent="Spotify")
+
+# Search by company URL
+results = service.search_jobs(url="company.com")
+
+# Search by product usage (supports exact matching)
+results = service.search_jobs(uses_product="Docker", exact=True)
+
+# Search by product category
+results = service.search_jobs(uses_category="Container Orchestration")
+
+# Limit results
+results = service.search_jobs(name="developer", limit=5)
+```
+
+### Search Results
+
+The search results are returned in the following format:
+
+```python
+{
+    "status": "success",
+    "count": int,
+    "entries": [
+        {
+            "job_name": str,
+            "company_name": str,
+            "company_url": str,
+            "tags_matched": List[str],
+            "tag_categories": List[str]
+        }
+    ],
+    "pagination": {
+        "limit": int
+    }
+}
+```
+
+### Important Notes
+
+- Only one search parameter can be used at a time
+- The `exact` parameter can only be used with `name` and `uses_product` searches
+- All searches are case-insensitive
 
 ## Contributing
 
+For development, install the package with development dependencies:
+
 ```bash
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
 ### Building
