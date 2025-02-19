@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sourcestack"
-version = "0.0.7"
+version = "0.0.8"
 description = "A python package for using the https://sourcestack.co/ API."
 readme = "README.md"
 authors = [
@@ -32,6 +32,7 @@ dev = [
     "isort>=5.0",
     "mypy>=0.900",
     "flake8>=3.9",
+    "twine",
 ]
 
 [tool.pytest.ini_options]
