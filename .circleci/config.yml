@@ -14,6 +14,7 @@ jobs:
           pkg-manager: pip-dist
           app-dir: .
           pip-dependency-file: "pyproject.toml"
+      - run: pip install -e .[dev]
       - run: isort **/*.py -c
   mypy:
     executor: default
@@ -37,7 +38,7 @@ jobs:
           app-dir: .
           pip-dependency-file: "pyproject.toml"
       - python/dist
-      - run: pip install "dist/sourcestack-*.whl[dev]" 
+      - run: pip install -e .[dev]
       - run: pytest --junit-xml=tmp/results.xml
       - store_test_results:
           path: tmp/results.xml
