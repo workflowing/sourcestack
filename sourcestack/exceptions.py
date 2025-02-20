@@ -1,9 +1,11 @@
+from typing import Optional
+
+
 class SearchError(Exception):
     """Base exception for search service errors"""
 
-    def __init__(self, message: str, status_code: int = None):
+    def __init__(self, message: str, status_code: Optional[int] = None):
         """Initialize search error
-
         Args:
             message: Error message
             status_code: Optional HTTP status code
