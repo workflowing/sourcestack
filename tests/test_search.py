@@ -1,8 +1,10 @@
-import pytest
-from sourcestack.search import SourceStackSearchService
-from sourcestack.exceptions import SearchError
-from unittest.mock import Mock, patch
 import os
+from unittest.mock import Mock, patch
+
+import pytest
+
+from sourcestack.exceptions import SearchError
+from sourcestack.search import SourceStackSearchService
 
 
 @pytest.fixture
