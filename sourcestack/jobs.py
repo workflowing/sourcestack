@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List, TypedDict, Optional
 from urllib.parse import urljoin
 
 from sourcestack.resource import Resource
@@ -98,6 +98,32 @@ class Jobs(Resource):
             **kwargs,
         }
         return self._get(**params)
+
+    def search_advanced(
+        self, filters: List[Dict[str, Any]], limit: Optional[int] = None
+    ) -> Response:
+        """
+        Performs advanced job search using filters via the SourceStack API.
+
+        Args:
+            filters: List of filter dictionaries. Each filter should contain:
+                    - field: The field to filter on
+                    - operator: The operator to use
+                    - value: The value to filter by
+            limit: Optional maximum number of results to return
+
+        Returns:
+            Response: A list of jobs matching the filters.
+        """
+        url = urljoin(self.base_url, "jobs")
+        data = {"filters": filters}
+
+        if limit is not None:
+            data["limit"] = limit
+
+        response = self.session.post(url, json=data)
+        response.raise_for_status()
+        return response.json()
 
     def _get(self, **kwargs) -> Response:
         url = urljoin(self.base_url, "jobs")

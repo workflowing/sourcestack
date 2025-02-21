@@ -43,6 +43,20 @@ class SourceStackSearchService:
                 f"Exactly one search parameter required from: {self.SEARCH_PARAMS}"
             )
 
+    def _validate_filter_format(self, filters: List[Dict[str, Any]]) -> None:
+        """Validate the format of search filters"""
+        if not filters:
+            raise SearchError("Filters list cannot be empty")
+
+        required_keys = {"field", "operator", "value"}
+        for filter_dict in filters:
+            if not isinstance(filter_dict, dict):
+                raise SearchError("Each filter must be a dictionary")
+            if not all(key in filter_dict for key in required_keys):
+                raise SearchError(
+                    f"Filter must contain all required keys: {required_keys}"
+                )
+
     def _process_url(self, url: str) -> str:
         """Process URL by removing common prefixes"""
         url = url.replace("https://", "").replace("http://", "")
@@ -152,3 +166,36 @@ class SourceStackSearchService:
 
         except Exception as e:
             raise SearchError(f"Search failed: {str(e)}") from e
+
+    def search_jobs_advanced(
+        self, filters: List[Dict[str, Any]], limit: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Search for jobs using advanced filtering
+
+        Args:
+            filters: List of filter dictionaries. Each filter should contain:
+                    - field: The field to filter on
+                    - operator: The operator to use (EQUALS, NOT_EQUALS, IN, etc.)
+                    - value: The value to filter by
+            limit: Optional maximum number of results to return
+
+        Returns:
+            Dict containing search results and metadata
+
+        Raises:
+            SearchError: If the search fails or filter validation fails
+        """
+        try:
+            # Validate filter format
+            self._validate_filter_format(filters)
+
+            # Execute search via client
+            results = self.client.jobs.search_advanced(filters=filters, limit=limit)
+
+            # Format results with statistics
+            response = self._format_results(results["data"], limit=limit)
+
+            return response
+
+        except Exception as e:
+            raise SearchError(f"Advanced search failed: {str(e)}") from e

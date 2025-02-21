@@ -101,3 +101,68 @@ class TestSearchResults:
         assert len(results["entries"]) <= limit
         assert "pagination" in results
         assert results["pagination"]["limit"] == limit
+
+
+@pytest.mark.integration
+class TestAdvancedJobSearch:
+    def test_search_jobs_advanced_single_filter(self, search_service):
+        filters = [{"field": "country", "operator": "IN", "value": ["United States"]}]
+        results = search_service.search_jobs_advanced(filters=filters, limit=2)
+        assert results["status"] == "success"
+        assert results["count"] > 0
+        assert all(job["country"] == "United States" for job in results["entries"])
+
+    def test_search_jobs_advanced_multiple_filters(self, search_service):
+        filters = [
+            {"field": "remote", "operator": "EQUALS", "value": True},
+            {"field": "tags_matched", "operator": "CONTAINS_ANY", "value": ["Python"]},
+        ]
+        results = search_service.search_jobs_advanced(filters=filters)
+        assert results["status"] == "success"
+        assert all(
+            (job["remote"] == "true" or job["remote"] is True)
+            and "Python" in job["tags_matched"]
+            for job in results["entries"]
+        )
+
+    def test_search_jobs_advanced_date_filter(self, search_service):
+        filters = [
+            {"field": "last_indexed", "operator": "GREATER_THAN", "value": "LAST_7D"}
+        ]
+        results = search_service.search_jobs_advanced(filters=filters)
+        assert results["status"] == "success"
+        assert results["count"] > 0
+
+    def test_search_jobs_advanced_with_limit(self, search_service):
+        filters = [
+            {"field": "department", "operator": "EQUALS", "value": "Engineering"}
+        ]
+        limit = 5
+        results = search_service.search_jobs_advanced(filters=filters, limit=limit)
+        assert results["status"] == "success"
+        assert len(results["entries"]) <= limit
+
+
+class TestAdvancedSearchValidation:
+    def test_invalid_filter_format(self, mock_search_service):
+        service, _ = mock_search_service
+        with pytest.raises(SearchError):
+            service.search_jobs_advanced(filters=[{"invalid": "format"}])
+
+    def test_empty_filters_list(self, mock_search_service):
+        service, _ = mock_search_service
+        with pytest.raises(SearchError):
+            service.search_jobs_advanced(filters=[])
+
+
+class TestAdvancedSearchResults:
+    @pytest.mark.integration
+    def test_statistics_present_in_response(self, search_service):
+        filters = [
+            {"field": "tags_matched", "operator": "CONTAINS_ANY", "value": ["AWS"]}
+        ]
+        results = search_service.search_jobs_advanced(filters=filters)
+        assert "statistics" in results
+        assert "companies" in results["statistics"]
+        assert "technologies" in results["statistics"]
+        assert "categories" in results["statistics"]
