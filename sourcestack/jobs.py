@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, TypedDict, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 from urllib.parse import urljoin
 
 from sourcestack.resource import Resource
@@ -116,12 +116,11 @@ class Jobs(Resource):
             Response: A list of jobs matching the filters.
         """
         url = urljoin(self.base_url, "jobs")
-        data = {"filters": filters}
-
+        params = {}
         if limit is not None:
-            data["limit"] = limit
+            params["limit"] = limit
 
-        response = self.session.post(url, json=data)
+        response = self.session.post(url, json={"filters": filters}, params=params)
         response.raise_for_status()
         return response.json()
 
