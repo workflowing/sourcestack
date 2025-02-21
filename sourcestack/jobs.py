@@ -99,25 +99,32 @@ class Jobs(Resource):
         }
         return self._get(**params)
 
-    def search_advanced(
-        self, filters: List[Dict[str, Any]], limit: Optional[int] = None
-    ) -> Response:
+    def search_advanced(self, **kwargs) -> Response:
         """
         Performs advanced job search using filters via the SourceStack API.
 
         Args:
-            filters: List of filter dictionaries. Each filter should contain:
-                    - field: The field to filter on
-                    - operator: The operator to use
-                    - value: The value to filter by
-            limit: Optional maximum number of results to return
+            field (str): The field to filter on
+            operator (str): The operator to use
+            value (str): The value to filter by
+            limit (Optional[int]): Maximum number of results to return
 
         Returns:
             Response: A list of jobs matching the filters.
         """
         url = urljoin(self.base_url, "jobs")
         params = {}
-        if limit is not None:
+
+        # Build filter from individual args
+        filters = [
+            {
+                "field": kwargs.get("field"),
+                "operator": kwargs.get("operator"),
+                "value": kwargs.get("value"),
+            }
+        ]
+
+        if limit := kwargs.get("limit"):
             params["limit"] = limit
 
         response = self.session.post(url, json={"filters": filters}, params=params)

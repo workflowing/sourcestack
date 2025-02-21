@@ -65,7 +65,6 @@ class SourceStackSearchService:
     def _format_results(
         self,
         results: List[Dict[str, Any]],
-        limit: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Format the search results with statistics"""
         if not results:
@@ -153,7 +152,7 @@ class SourceStackSearchService:
                 )
 
             # Format results with statistics
-            response = self._format_results(results["data"], limit=kwargs.get("limit"))
+            response = self._format_results(results["data"])
 
             # Add pagination if limit was specified
             if limit := kwargs.get("limit"):
@@ -167,17 +166,20 @@ class SourceStackSearchService:
         except Exception as e:
             raise SearchError(f"Search failed: {str(e)}") from e
 
-    def search_jobs_advanced(
-        self, filters: List[Dict[str, Any]], limit: Optional[int] = None
-    ) -> Dict[str, Any]:
+    def search_jobs_advanced(self, **kwargs) -> Dict[str, Any]:
         """Search for jobs using advanced filtering
 
         Args:
-            filters: List of filter dictionaries. Each filter should contain:
-                    - field: The field to filter on
-                    - operator: The operator to use (EQUALS, NOT_EQUALS, IN, etc.)
-                    - value: The value to filter by
-            limit: Optional maximum number of results to return
+            field (str): The field to filter on
+            operator (str): The operator to use. Supported operators vary by field type:
+                - Text: EQUALS, NOT_EQUALS, IN, NOT_IN, CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
+                - Number: All operators except CONTAINS variants
+                - List: CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
+                - Boolean: EQUALS, NOT_EQUALS
+                - Datetime: All operators except CONTAINS variants and IN/NOT_IN
+            value (str): The value to filter by
+            limit (int, optional): Maximum number of results to return
+            preview (str): Number of entries to preview
 
         Returns:
             Dict containing search results and metadata
@@ -186,14 +188,40 @@ class SourceStackSearchService:
             SearchError: If the search fails or filter validation fails
         """
         try:
-            # Validate filter format
-            self._validate_filter_format(filters)
+            # Validate required parameters
+            required_params = {"field", "operator", "value"}
+            if not all(param in kwargs for param in required_params):
+                raise SearchError(
+                    f"Required parameters missing. Need: {required_params}"
+                )
+
+            # Validate operator
+            valid_operators = {
+                # Basic comparison operators
+                "EQUALS",
+                "NOT_EQUALS",
+                "GREATER_THAN",
+                "LESS_THAN",
+                # List operators
+                "IN",
+                "NOT_IN",
+                # Content matching operators
+                "CONTAINS_ANY",
+                "NOT_CONTAINS_ANY",
+                "CONTAINS_ALL",
+                "NOT_CONTAINS_ALL",
+            }
+
+            if kwargs["operator"] not in valid_operators:
+                raise SearchError(
+                    f"Invalid operator. Must be one of: {valid_operators}"
+                )
 
             # Execute search via client
-            results = self.client.jobs.search_advanced(filters=filters, limit=limit)
+            results = self.client.jobs.search_advanced(**kwargs)
 
             # Format results with statistics
-            response = self._format_results(results["data"], limit=limit)
+            response = self._format_results(results["data"])
 
             return response
 
