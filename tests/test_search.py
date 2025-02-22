@@ -104,7 +104,8 @@ class TestSearchResults:
 class TestAdvancedJobSearch:
     def test_search_jobs_advanced_single_filter(self, search_service):
         results = search_service.search_jobs_advanced(
-            field="country", operator="IN", value="United States", limit=2
+            filters=[{"field": "country", "operator": "IN", "value": "United States"}],
+            limit=2,
         )
         assert results["status"] == "success"
         assert results["count"] > 0
@@ -112,30 +113,71 @@ class TestAdvancedJobSearch:
 
     def test_search_jobs_advanced_with_limit(self, search_service):
         results = search_service.search_jobs_advanced(
-            field="department", operator="EQUALS", value="Engineering", limit=5
+            filters=[
+                {"field": "department", "operator": "EQUALS", "value": "Engineering"}
+            ],
+            limit=5,
         )
         assert results["status"] == "success"
         assert len(results["entries"]) <= 5
 
     def test_search_jobs_advanced_date_filter(self, search_service):
         results = search_service.search_jobs_advanced(
-            field="last_indexed", operator="GREATER_THAN", value="LAST_7D", limit=2
+            filters=[
+                {
+                    "field": "last_indexed",
+                    "operator": "GREATER_THAN",
+                    "value": "LAST_7D",
+                }
+            ],
+            limit=2,
         )
         assert results["status"] == "success"
         assert results["count"] > 0
+
+    def test_search_jobs_advanced_multiple_filters(self, search_service):
+        results = search_service.search_jobs_advanced(
+            filters=[
+                {
+                    "field": "job_name",
+                    "operator": "CONTAINS_ANY",
+                    "value": "Senior Engineer",
+                },
+                {"field": "country", "operator": "EQUALS", "value": "United States"},
+            ],
+            limit=5,
+        )
+        assert results["status"] == "success"
+        assert results["count"] > 0
+        assert all(
+            job["country"] == "United States"
+            and any(
+                term.lower() in job["job_name"].lower()
+                for term in ["senior", "engineer"]
+            )
+            for job in results["entries"]
+        )
 
 
 class TestAdvancedSearchValidation:
     def test_missing_required_parameters(self, mock_search_service):
         service, _ = mock_search_service
-        with pytest.raises(SearchError, match="Required parameters missing"):
-            service.search_jobs_advanced(field="country")
+        with pytest.raises(
+            SearchError, match="At least one filter condition must be provided"
+        ):
+            service.search_jobs_advanced(filters=[])
 
     def test_invalid_operator(self, mock_search_service):
         service, _ = mock_search_service
         with pytest.raises(SearchError, match="Invalid operator"):
             service.search_jobs_advanced(
-                field="country", operator="INVALID_OP", value="United States"
+                filters=[
+                    {
+                        "field": "country",
+                        "operator": "INVALID_OP",
+                        "value": "United States",
+                    }
+                ]
             )
 
     def test_valid_operator(self, mock_search_service):
@@ -143,7 +185,9 @@ class TestAdvancedSearchValidation:
         with patch.object(service.client.jobs, "search_advanced") as mock_search:
             mock_search.return_value = {"data": []}
             service.search_jobs_advanced(
-                field="country", operator="EQUALS", value="United States"
+                filters=[
+                    {"field": "country", "operator": "EQUALS", "value": "United States"}
+                ]
             )
             mock_search.assert_called_once()
 
@@ -152,7 +196,10 @@ class TestAdvancedSearchResults:
     @pytest.mark.integration
     def test_statistics_present_in_response(self, search_service):
         results = search_service.search_jobs_advanced(
-            field="tags_matched", operator="CONTAINS_ANY", value="AWS", limit=2
+            filters=[
+                {"field": "tags_matched", "operator": "CONTAINS_ANY", "value": "AWS"}
+            ],
+            limit=2,
         )
         assert "statistics" in results
         assert "companies" in results["statistics"]
@@ -163,7 +210,9 @@ class TestAdvancedSearchResults:
     def test_pagination_with_limit(self, search_service):
         limit = 5
         results = search_service.search_jobs_advanced(
-            field="tags_matched", operator="CONTAINS_ANY", value="Python", limit=limit
+            filters=[
+                {"field": "tags_matched", "operator": "CONTAINS_ANY", "value": "Python"}
+            ],
+            limit=limit,
         )
-
         assert len(results["entries"]) <= limit
