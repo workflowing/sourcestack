@@ -98,8 +98,6 @@ class TestSearchResults:
 
         assert results["status"] == "success"
         assert len(results["entries"]) <= limit
-        assert "pagination" in results
-        assert results["pagination"]["limit"] == limit
 
 
 @pytest.mark.integration

@@ -50,25 +50,32 @@ results = service.search_jobs(name="developer", limit=5)
 
 ### Advanced Search
 
-For more complex queries, you can use the advanced search functionality:
+For advanced queries, you can use the advanced search functionality:
 
 ```python
-# Search with multiple filters
-filters = [
-    {"field": "remote", "operator": "EQUALS", "value": True},
-    {"field": "tags_matched", "operator": "CONTAINS_ANY", "value": ["Python"]}
-]
-results = service.search_jobs_advanced(filters=filters)
+# Search with a filter
+results = service.search_jobs_advanced(
+    field="remote",
+    operator="EQUALS",
+    value=True
+)
 
 # Advanced search with limit
-results = service.search_jobs_advanced(filters=filters, limit=5)
-
-# Date-based filtering
-filters = [
-    {"field": "last_indexed", "operator": "GREATER_THAN", "value": "LAST_7D"}
-]
-results = service.search_jobs_advanced(filters=filters)
+results = service.search_jobs_advanced(
+    field="tags_matched",
+    operator="CONTAINS_ANY",
+    value=["Python"],
+    limit=5
+)
 ```
+
+### Advanced Search Operators
+
+The following operators are supported:
+
+- Basic comparison: EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN
+- List operations: IN, NOT_IN
+- Content matching: CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
 
 ### Search Results
 
@@ -104,11 +111,7 @@ The search results are returned in the following format:
             "country": str,
             # ... other job fields
         }
-    ],
-    "pagination": {  # Only present when limit is specified
-        "limit": int,
-        "total": int
-    }
+    ]
 }
 ```
 
@@ -118,8 +121,8 @@ The search results are returned in the following format:
 - The `exact` parameter can only be used with `name` and `uses_product` searches
 - All searches are case-insensitive
 - Company URLs are automatically processed to remove common prefixes (http://, https://, www.)
-- Advanced search requires at least one filter
-- Advanced search filters must contain `field`, `operator`, and `value` keys
+- Advanced search requires a field, operator, and value
+- The operator must be one of the supported operators listed above
 
 ## Contributing
 
