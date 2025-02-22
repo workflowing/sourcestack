@@ -51,6 +51,7 @@ jobs:
           app-dir: .
           pip-dependency-file: "pyproject.toml"
       - python/dist
+      - run: pip install -e .[dev]
       - run: twine upload dist/*
 workflows:
   build:
