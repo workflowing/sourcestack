@@ -154,13 +154,6 @@ class SourceStackSearchService:
             # Format results with statistics
             response = self._format_results(results["data"])
 
-            # Add pagination if limit was specified
-            if limit := kwargs.get("limit"):
-                response["pagination"] = {
-                    "limit": limit,
-                    "total": len(results["data"]),
-                }
-
             return response
 
         except Exception as e:
