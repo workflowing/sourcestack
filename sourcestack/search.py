@@ -163,14 +163,15 @@ class SourceStackSearchService:
         """Search for jobs using advanced filtering
 
         Args:
-            field (str): The field to filter on
-            operator (str): The operator to use. Supported operators vary by field type:
-                - Text: EQUALS, NOT_EQUALS, IN, NOT_IN, CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
-                - Number: All operators except CONTAINS variants
-                - List: CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
-                - Boolean: EQUALS, NOT_EQUALS
-                - Datetime: All operators except CONTAINS variants and IN/NOT_IN
-            value (str): The value to filter by
+            filters (List[Dict]): List of filter conditions, each containing:
+                - field (str): The field to filter on
+                - operator (str): The operator to use. Supported operators vary by field type:
+                    - Text: EQUALS, NOT_EQUALS, IN, NOT_IN, CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
+                    - Number: All operators except CONTAINS variants
+                    - List: CONTAINS_ANY, NOT_CONTAINS_ANY, CONTAINS_ALL, NOT_CONTAINS_ALL
+                    - Boolean: EQUALS, NOT_EQUALS
+                    - Datetime: All operators except CONTAINS variants and IN/NOT_IN
+                - value (str): The value to filter by
             limit (int, optional): Maximum number of results to return
             preview (str): Number of entries to preview
 
@@ -181,14 +182,17 @@ class SourceStackSearchService:
             SearchError: If the search fails or filter validation fails
         """
         try:
-            # Validate required parameters
-            required_params = {"field", "operator", "value"}
-            if not all(param in kwargs for param in required_params):
+            # Check if filters exist in kwargs
+            filters = kwargs.get("filters", [])
+            if not isinstance(filters, list):
                 raise SearchError(
-                    f"Required parameters missing. Need: {required_params}"
+                    "Filters must be provided as a list of filter conditions"
                 )
 
-            # Validate operator
+            if not filters:
+                raise SearchError("At least one filter condition must be provided")
+
+            # Validate each filter
             valid_operators = {
                 # Basic comparison operators
                 "EQUALS",
@@ -205,13 +209,23 @@ class SourceStackSearchService:
                 "NOT_CONTAINS_ALL",
             }
 
-            if kwargs["operator"] not in valid_operators:
-                raise SearchError(
-                    f"Invalid operator. Must be one of: {valid_operators}"
-                )
+            for filter_condition in filters:
+                # Validate required parameters for each filter
+                required_params = {"field", "operator", "value"}
+                if not all(param in filter_condition for param in required_params):
+                    raise SearchError(
+                        f"Each filter must contain all required parameters: {required_params}"
+                    )
 
-            # Execute search via client
-            results = self.client.jobs.search_advanced(**kwargs)
+                # Validate operator for each filter
+                if filter_condition["operator"] not in valid_operators:
+                    raise SearchError(
+                        f"Invalid operator. Must be one of: {valid_operators}"
+                    )
+
+            # Execute search via client with all filters
+            search_params = {"filters": filters, "limit": kwargs.get("limit")}
+            results = self.client.jobs.search_advanced(**search_params)
 
             # Format results with statistics
             response = self._format_results(results["data"])

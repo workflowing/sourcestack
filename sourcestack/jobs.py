@@ -104,9 +104,10 @@ class Jobs(Resource):
         Performs advanced job search using filters via the SourceStack API.
 
         Args:
-            field (str): The field to filter on
-            operator (str): The operator to use
-            value (str): The value to filter by
+            filters (List[Dict]): List of filter conditions, each containing:
+                - field (str): The field to filter on
+                - operator (str): The operator to use
+                - value (str): The value to filter by
             limit (Optional[int]): Maximum number of results to return
 
         Returns:
@@ -115,14 +116,8 @@ class Jobs(Resource):
         url = urljoin(self.base_url, "jobs")
         params = {}
 
-        # Build filter from individual args
-        filters = [
-            {
-                "field": kwargs.get("field"),
-                "operator": kwargs.get("operator"),
-                "value": kwargs.get("value"),
-            }
-        ]
+        # Get filters from kwargs
+        filters = kwargs.get("filters", [])
 
         if limit := kwargs.get("limit"):
             params["limit"] = limit
