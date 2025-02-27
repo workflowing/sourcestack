@@ -172,6 +172,7 @@ class SourceStackSearchService:
                     - Boolean: EQUALS, NOT_EQUALS
                     - Datetime: All operators except CONTAINS variants and IN/NOT_IN
                 - value (str): The value to filter by
+            fields (str): Comma-separated list of fields to return (e.g. 'post_url,job_name,tags_matched')
             limit (int, optional): Maximum number of results to return
             preview (str): Number of entries to preview
 
@@ -223,8 +224,18 @@ class SourceStackSearchService:
                         f"Invalid operator. Must be one of: {valid_operators}"
                     )
 
+            if fields := kwargs.get("fields"):
+                if not isinstance(fields, str):
+                    raise SearchError(
+                        "Fields parameter must be a comma-separated string"
+                    )
+
             # Execute search via client with all filters
-            search_params = {"filters": filters, "limit": kwargs.get("limit")}
+            search_params = {
+                "filters": filters,
+                "limit": kwargs.get("limit"),
+                "fields": kwargs.get("fields"),
+            }
             results = self.client.jobs.search_advanced(**search_params)
 
             # Format results with statistics

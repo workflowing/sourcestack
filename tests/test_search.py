@@ -72,6 +72,16 @@ class TestJobSearchEndpoints:
             for job in results["entries"]
         )
 
+    def test_jobs_search_with_fields(self, search_service):
+        """Test that search returns only specified fields"""
+        fields = "job_name,company_name,post_url"
+        results = search_service.search_jobs(name="DevOps", fields=fields, limit=2)
+        assert results["status"] == "success"
+        assert results["count"] > 0
+        # Check that only requested fields are present
+        for job in results["entries"]:
+            assert set(job.keys()) == set(fields.split(","))
+
 
 class TestSearchValidation:
     def test_exact_parameter_validation(self, mock_search_service):
@@ -158,6 +168,22 @@ class TestAdvancedJobSearch:
             for job in results["entries"]
         )
 
+    def test_search_jobs_advanced_with_fields(self, search_service):
+        """Test advanced search with field filtering"""
+        fields = "job_name,company_name,post_url"
+        results = search_service.search_jobs_advanced(
+            filters=[
+                {"field": "country", "operator": "EQUALS", "value": "United States"}
+            ],
+            fields=fields,
+            limit=2,
+        )
+        assert results["status"] == "success"
+        assert results["count"] > 0
+        # Check that only requested fields are present
+        for job in results["entries"]:
+            assert set(job.keys()) == set(fields.split(","))
+
 
 class TestAdvancedSearchValidation:
     def test_missing_required_parameters(self, mock_search_service):
@@ -190,6 +216,40 @@ class TestAdvancedSearchValidation:
                 ]
             )
             mock_search.assert_called_once()
+
+    def test_fields_parameter_type(self, mock_search_service):
+        """Test that fields parameter must be a string"""
+        service, _ = mock_search_service
+        with pytest.raises(
+            SearchError, match="Fields parameter must be a comma-separated string"
+        ):
+            service.search_jobs_advanced(
+                filters=[
+                    {"field": "country", "operator": "EQUALS", "value": "United States"}
+                ],
+                fields=["job_name", "company_name"],  # Should be string, not list
+            )
+
+    def test_fields_parameter_passing(self, mock_search_service):
+        """Test that fields parameter is correctly passed to the API"""
+        service, _ = mock_search_service
+        with patch.object(service.client.jobs, "search_advanced") as mock_search:
+            mock_search.return_value = {"data": []}
+            fields = "job_name,company_name,post_url"
+            service.search_jobs_advanced(
+                filters=[
+                    {"field": "country", "operator": "EQUALS", "value": "United States"}
+                ],
+                fields=fields,
+                limit=2,
+            )
+            mock_search.assert_called_once_with(
+                filters=[
+                    {"field": "country", "operator": "EQUALS", "value": "United States"}
+                ],
+                fields=fields,
+                limit=2,
+            )
 
 
 class TestAdvancedSearchResults:
