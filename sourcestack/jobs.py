@@ -122,6 +122,9 @@ class Jobs(Resource):
         if limit := kwargs.get("limit"):
             params["limit"] = limit
 
+        if fields := kwargs.get("fields"):
+            params["fields"] = fields
+
         response = self.session.post(url, json={"filters": filters}, params=params)
         response.raise_for_status()
         return response.json()
